@@ -130,24 +130,35 @@ class InfiniteCampusScraper:
             # Extract assignments
             assignments = await page.evaluate('''() => {
                 const assignments = [];
-                const rows = document.querySelectorAll('tr');
                 
-                rows.forEach(row => {
-                    const cells = row.querySelectorAll('td');
-                    if (cells.length >= 3) {
-                        const title = cells[0]?.textContent?.trim() || '';
-                        const course = cells[1]?.textContent?.trim() || '';
-                        const dueDate = cells[2]?.textContent?.trim() || '';
-                        
-                        if (title && title !== 'Assignment' && title !== 'Title' && title.length > 0) {
-                            assignments.push({
-                                title: title,
-                                course: course,
-                                due_date: dueDate,
-                                status: 'missing',
-                                points_possible: null
-                            });
+                // Find all assignment links with the actual Infinite Campus structure
+                const assignmentLinks = document.querySelectorAll('a[href="javascript:void(0);"]');
+                
+                assignmentLinks.forEach(link => {
+                    const title = link.textContent?.trim() || '';
+                    
+                    // Try to find parent elements to get course and due date info
+                    const parent = link.closest('tr, div[class*="assignment"], div[class*="row"]');
+                    let course = '';
+                    let dueDate = '';
+                    
+                    if (parent) {
+                        // Try to extract course and due date from parent
+                        const cells = parent.querySelectorAll('td, div');
+                        if (cells.length > 1) {
+                            course = cells[1]?.textContent?.trim() || '';
+                            dueDate = cells[2]?.textContent?.trim() || '';
                         }
+                    }
+                    
+                    if (title && title.length > 0) {
+                        assignments.push({
+                            title: title,
+                            course: course || 'Unknown',
+                            due_date: dueDate || 'Unknown',
+                            status: 'missing',
+                            points_possible: null
+                        });
                     }
                 });
                 
@@ -172,29 +183,37 @@ class InfiniteCampusScraper:
             # Wait for content to load
             await page.wait_for_timeout(2000)
             
-            # Extract grades
+            # Extract grades using actual Infinite Campus structure
             grades = await page.evaluate('''() => {
                 const grades = [];
-                const rows = document.querySelectorAll('tr');
                 
-                rows.forEach(row => {
-                    const cells = row.querySelectorAll('td');
-                    if (cells.length >= 2) {
-                        const course = cells[0]?.textContent?.trim() || '';
-                        const grade = cells[1]?.textContent?.trim() || '';
-                        
-                        if (course && course !== 'Course' && course !== 'Class' && course.length > 0) {
-                            // Try to extract percentage
-                            const percentMatch = grade.match(/(\\d+\\.?\\d*)%/);
-                            const gradePercent = percentMatch ? parseFloat(percentMatch[1]) : null;
-                            
-                            grades.push({
-                                course: course,
-                                grade: grade,
-                                grade_percent: gradePercent,
-                                date: new Date().toISOString()
-                            });
-                        }
+                // Find all grade containers
+                const gradeContainers = document.querySelectorAll('div.grades__flex-row--nowrap');
+                
+                gradeContainers.forEach(container => {
+                    // Find the course name (in the h5 > a > span)
+                    const courseSpan = container.querySelector('span.ng-star-inserted');
+                    const course = courseSpan?.textContent?.trim() || '';
+                    
+                    // Find the grade score (in tl-grading-score)
+                    const gradeDiv = container.querySelector('div.grading-score > div.ng-star-inserted');
+                    const grade = gradeDiv?.textContent?.trim() || '';
+                    
+                    // Find the percentage (in the second div with grading-score__row-spacing)
+                    const percentDiv = container.querySelector('div.grading-score__row-spacing');
+                    const percentText = percentDiv?.textContent?.trim() || '';
+                    
+                    // Extract percentage number
+                    const percentMatch = percentText.match(/(\\d+\\.?\\d*)%/);
+                    const gradePercent = percentMatch ? parseFloat(percentMatch[1]) : null;
+                    
+                    if (course && course.length > 0) {
+                        grades.push({
+                            course: course,
+                            grade: grade,
+                            grade_percent: gradePercent,
+                            date: new Date().toISOString()
+                        });
                     }
                 });
                 
