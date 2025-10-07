@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "homework-agent": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://noah-hw-mcp.onrender.com/sse"
+      ],
+      "env": {
+        "API_KEY": "hw_agent_2024_secure_key_abc123xyz789"
+      }
+    }
+  }
+}

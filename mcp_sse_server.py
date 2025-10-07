@@ -1,27 +1,30 @@
 #!/usr/bin/env python3
 """
-MCP Server for Render deployment with SSE support
+MCP Server with SSE support for testing with mcp-remote
 """
 
 import json
-import os
+import asyncio
+import sys
 from datetime import datetime, timedelta
 from http.server import HTTPServer, BaseHTTPRequestHandler
+import threading
+import time
 
 # Configuration
 API_KEY = "hw_agent_2024_secure_key_abc123xyz789"
-PORT = int(os.environ.get("PORT", 8000))
+HOST = "localhost"
+PORT = 8000
 
-class MCPHandler(BaseHTTPRequestHandler):
+class MCPSSEHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/sse":
             self.send_sse_response()
         elif self.path == "/":
             self.send_json_response({
-                "message": "Homework Agent MCP Server",
+                "message": "MCP Server with SSE support",
                 "version": "1.0.0",
                 "status": "running",
-                "tools": ["check_missing_assignments", "get_course_grades", "health"],
                 "endpoints": {
                     "sse": "/sse",
                     "health": "/health",
@@ -66,16 +69,15 @@ class MCPHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({"error": "Not found"}).encode())
     
     def send_sse_response(self):
-        """Send Server-Sent Events response for MCP"""
+        """Send Server-Sent Events response"""
         self.send_response(200)
         self.send_header('Content-Type', 'text/event-stream')
         self.send_header('Cache-Control', 'no-cache')
         self.send_header('Connection', 'keep-alive')
         self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Headers', 'Authorization, Content-Type')
         self.end_headers()
         
-        # Send MCP initialization
+        # Send MCP initialization message
         init_message = {
             "jsonrpc": "2.0",
             "method": "initialize",
@@ -85,7 +87,7 @@ class MCPHandler(BaseHTTPRequestHandler):
                     "tools": {}
                 },
                 "clientInfo": {
-                    "name": "mcp-client",
+                    "name": "mcp-remote-test",
                     "version": "1.0.0"
                 }
             },
@@ -97,6 +99,17 @@ class MCPHandler(BaseHTTPRequestHandler):
         
         # Send tools list
         tools_message = {
+            "jsonrpc": "2.0",
+            "method": "tools/list",
+            "params": {},
+            "id": 2
+        }
+        
+        self.wfile.write(f"data: {json.dumps(tools_message)}\n\n".encode())
+        self.wfile.flush()
+        
+        # Send tools response
+        tools_response = {
             "jsonrpc": "2.0",
             "result": {
                 "tools": [
@@ -142,10 +155,10 @@ class MCPHandler(BaseHTTPRequestHandler):
                     }
                 ]
             },
-            "id": 1
+            "id": 2
         }
         
-        self.wfile.write(f"data: {json.dumps(tools_message)}\n\n".encode())
+        self.wfile.write(f"data: {json.dumps(tools_response)}\n\n".encode())
         self.wfile.flush()
     
     def do_POST(self):
@@ -243,15 +256,27 @@ class MCPHandler(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Headers', 'Authorization, Content-Type')
         self.end_headers()
 
-if __name__ == "__main__":
-    print(f"🚀 Starting MCP Server on port {PORT}")
+def main():
+    print(f"🚀 Starting MCP SSE Server on {HOST}:{PORT}")
     print(f"🔑 API Key: {API_KEY}")
-    print(f"🌐 Server URL: https://noah-hw-mcp.onrender.com")
-    print(f"📡 SSE Endpoint: https://noah-hw-mcp.onrender.com/sse")
+    print(f"🌐 Server URL: http://{HOST}:{PORT}")
+    print(f"📡 SSE Endpoint: http://{HOST}:{PORT}/sse")
+    print("=" * 50)
     
     try:
-        server = HTTPServer(('0.0.0.0', PORT), MCPHandler)
+        server = HTTPServer((HOST, PORT), MCPSSEHandler)
         print("✅ Server started successfully!")
+        print("🔍 Test with: curl http://localhost:8000/")
+        print("📡 Test SSE with: curl http://localhost:8000/sse")
+        print("🛑 Press Ctrl+C to stop")
+        print("=" * 50)
+        
         server.serve_forever()
+    except KeyboardInterrupt:
+        print("\n🛑 Server stopped")
+        server.shutdown()
     except Exception as e:
         print(f"❌ Error: {e}")
+
+if __name__ == "__main__":
+    main()
