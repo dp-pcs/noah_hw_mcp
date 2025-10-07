@@ -185,7 +185,7 @@ class InfiniteCampusScraper:
                         
                         if (course && course !== 'Course' && course !== 'Class' && course.length > 0) {
                             // Try to extract percentage
-                            const percentMatch = grade.match(/(\d+\.?\d*)%/);
+                            const percentMatch = grade.match(/(\\d+\\.?\\d*)%/);
                             const gradePercent = percentMatch ? parseFloat(percentMatch[1]) : null;
                             
                             grades.push({
