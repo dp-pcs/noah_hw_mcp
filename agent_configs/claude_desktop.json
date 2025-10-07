@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "homework-agent": {
+      "command": "/opt/homebrew/bin/python3.12",
+      "args": ["/Users/davidproctor/Documents/GitHub/noah_hw_mcp/improved_server.py"],
+      "env": {
+        "PORTAL_BASE_URL": "https://academy20co.infinitecampus.org/campus/SSO/academy20/portal/parents?configID=2",
+        "LOGIN_URL": "https://academy20co.infinitecampus.org/campus/SSO/academy20/portal/parents?configID=2",
+        "PORTAL_USERNAME": "david.proctor_p@asd20.org",
+        "PORTAL_PASSWORD": "H4X7$PU8Yz#H",
+        "HEADLESS": "true"
+      }
+    }
+  }
+}

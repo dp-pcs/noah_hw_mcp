@@ -1,0 +1,25 @@
+# School Portal Configuration
+PORTAL_BASE_URL=https://academy20co.infinitecampus.org/campus/nav-wrapper/parent/portal/parent
+LOGIN_URL=https://academy20co.infinitecampus.org/campus/nav-wrapper/parent/portal/parent/login
+LOGIN_PATH=/login
+
+# Portal Credentials (use keyring for security)
+PORTAL_USERNAME=your_username
+PORTAL_PASSWORD=your_password
+
+# Server Configuration
+HOST=0.0.0.0
+PORT=8000
+HEADLESS=true
+STATE_PATH=./state.json
+
+# Security Configuration
+API_KEY=your_secure_api_key_here
+ALLOWED_ORIGINS=http://localhost:3000,https://chat.openai.com,https://platform.openai.com
+SECRET_HEADER=X-Homework-Agent
+
+# Optional: Use keyring for sensitive data
+# Run these commands to store securely:
+# python3 -c "import keyring; keyring.set_password('homework-agent', 'PORTAL_USERNAME', 'your_username')"
+# python3 -c "import keyring; keyring.set_password('homework-agent', 'PORTAL_PASSWORD', 'your_password')"
+# python3 -c "import keyring; keyring.set_password('homework-agent', 'API_KEY', 'your_secure_api_key')"

@@ -1,0 +1,45 @@
+{
+  "name": "homework-agent-mcp-public",
+  "description": "Public MCP Server for Infinite Campus parent portal access",
+  "server": {
+    "type": "http",
+    "url": "https://homework-agent-mcp.herokuapp.com",
+    "authentication": {
+      "type": "api_key",
+      "api_key": "hw_agent_2024_secure_key_abc123xyz789"
+    }
+  },
+  "tools": [
+    {
+      "name": "check_missing_assignments",
+      "description": "Get missing assignments from Infinite Campus",
+      "parameters": {
+        "since_days": {
+          "type": "integer",
+          "description": "Number of days to look back (default: 14)",
+          "default": 14
+        }
+      }
+    },
+    {
+      "name": "get_course_grades", 
+      "description": "Get course grade history from Infinite Campus",
+      "parameters": {
+        "course": {
+          "type": "string",
+          "description": "Course name filter (optional)"
+        },
+        "since_days": {
+          "type": "integer", 
+          "description": "Number of days to look back (default: 14)",
+          "default": 14
+        }
+      }
+    },
+    {
+      "name": "health",
+      "description": "Check server health and portal connectivity",
+      "parameters": {}
+    }
+  ]
+}

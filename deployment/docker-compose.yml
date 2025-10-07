@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  homework-mcp:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - PORTAL_BASE_URL=https://academy20co.infinitecampus.org/campus/SSO/academy20/portal/parents?configID=2
+      - LOGIN_URL=https://academy20co.infinitecampus.org/campus/SSO/academy20/portal/parents?configID=2
+      - PORTAL_USERNAME=${PORTAL_USERNAME}
+      - PORTAL_PASSWORD=${PORTAL_PASSWORD}
+      - HEADLESS=true
+      - HOST=0.0.0.0
+      - PORT=8000
+    volumes:
+      - ./state.json:/app/state.json
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
