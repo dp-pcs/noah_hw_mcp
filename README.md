@@ -1,6 +1,59 @@
 # Homework Agent MCP Server
 
-A Model Context Protocol (MCP) server that provides tools for accessing school parent portals to retrieve grades and missing assignments. This server uses Playwright for headless browser automation to work with portals that don't have public APIs.
+A Model Context Protocol (MCP) server for accessing Infinite Campus parent portal data. This server provides tools for AI agents to retrieve student grades, missing assignments, and other academic information.
+
+## 🚀 Quick Start
+
+### For OpenAI Agents
+
+Use this configuration in your OpenAI agent:
+
+```json
+{
+  "name": "homework-agent-mcp",
+  "server": {
+    "type": "http",
+    "url": "https://your-deployed-server.com",
+    "authentication": {
+      "type": "api_key",
+      "api_key": "hw_agent_2024_secure_key_abc123xyz789"
+    }
+  }
+}
+```
+
+### Available Tools
+
+- **`check_missing_assignments`** - Get missing assignments
+- **`get_course_grades`** - Get course grade history  
+- **`health`** - Check server health
+
+## 🌐 Deployment Options
+
+### Option 1: Render.com (Free & Easy)
+
+1. Fork this repository
+2. Go to [render.com](https://render.com)
+3. Create new "Web Service"
+4. Connect your GitHub repo
+5. Use these settings:
+   - **Build Command**: `echo "No build needed"`
+   - **Start Command**: `python3 heroku_server.py`
+   - **Port**: `8000`
+
+### Option 2: AWS EC2
+
+Use the deployment scripts in `deployment/aws/`:
+
+```bash
+./deployment/aws/deploy_aws.sh
+```
+
+### Option 3: Local Development
+
+```bash
+python3 working_server.py
+```
 
 ## Features
 
